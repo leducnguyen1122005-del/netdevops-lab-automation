@@ -1,0 +1,39 @@
+---
+- name: Configure Nginx Load Balancer on Control/Proxy Node
+  hosts: localhost
+  become: true
+  tasks:
+    - name: Ensure Nginx is installed on Load Balancer
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
+
+    - name: Create Nginx Load Balancer configuration
+      copy:
+        dest: /etc/nginx/sites-available/default
+        content: |
+          upstream backend_servers {
+              server 192.168.128.11;
+              server 192.168.128.12;
+          }
+
+          server {
+              listen 80;
+              server_name localhost;
+
+              location / {
+                  proxy_pass http://backend_servers;
+                  proxy_set_header Host $host;
+                  proxy_set_header X-Real-IP $remote_addr;
+                  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+              }
+          }
+
+    - name: Test Nginx configuration syntax
+      command: nginx -t
+
+    - name: Restart Nginx service to apply load balancing
+      systemd:
+        name: nginx
+        state: restarted

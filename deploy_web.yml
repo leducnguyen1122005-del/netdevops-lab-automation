@@ -1,0 +1,37 @@
+---
+- name: Deploy Custom Nginx Web Server on Targets
+  hosts: targets
+  become: true
+  tasks:
+    - name: Update apt cache and install Nginx
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
+
+    - name: Ensure Nginx service is running and enabled
+      systemd:
+        name: nginx
+        state: started
+        enabled: yes
+
+    - name: Create custom index.html page
+      copy:
+        dest: /var/www/html/index.html
+        content: |
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <title>NetDevOps Lab Success</title>
+              <style>
+                  body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; background-color: #f4f4f9; }
+                  h1 { color: #2c3e50; }
+                  p { color: #27ae60; font-size: 18px; }
+              </style>
+          </head>
+          <body>
+              <h1>Welcome to NetDevOps Lab!</h1>
+              <p>Managed successfully by Ansible Control Node (192.168.128.10)</p>
+              <p>Target Node IP: {{ ansible_default_ipv4.address }}</p>
+          </body>
+          </html>

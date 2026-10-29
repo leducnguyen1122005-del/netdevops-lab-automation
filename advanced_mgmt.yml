@@ -1,0 +1,42 @@
+---
+- name: Advanced NetDevOps Management - Firewall, Updates & Backup
+  hosts: targets
+  become: true
+  tasks:
+    - name: Ensure UFW Firewall is installed
+      apt:
+        name: ufw
+        state: present
+
+    - name: Allow SSH traffic through UFW
+      ufw:
+        rule: allow
+        port: '22'
+        proto: tcp
+
+    - name: Allow HTTP traffic through UFW
+      ufw:
+        rule: allow
+        port: '80'
+        proto: tcp
+
+    - name: Enable UFW Firewall
+      ufw:
+        state: enabled
+
+    - name: Create backup directory on Target Nodes
+      file:
+        path: /var/backups/nginx_config
+        state: directory
+        mode: '0755'
+
+    - name: Backup Nginx configuration with timestamp
+      copy:
+        src: /etc/nginx/nginx.conf
+        dest: "/var/backups/nginx_config/nginx.conf.bak_{{ ansible_date_time.date }}"
+        remote_src: yes
+
+    - name: Upgrade all installed packages to latest version
+      apt:
+        upgrade: dist
+        update_cache: yes
