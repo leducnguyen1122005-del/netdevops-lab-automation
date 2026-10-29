@@ -1,0 +1,46 @@
+name: NetDevOps CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "master", "main" ]
+  pull_request:
+    branches: [ "master", "main" ]
+
+jobs:
+  # Giai đoạn 1: Continuous Integration (Kiểm tra cú pháp & tính hợp lệ của Playbook)
+  syntax_check:
+    name: CI - Syntax Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install Ansible
+        run: |
+          python -m pip install --upgrade pip
+          pip install ansible
+
+      - name: Validate Playbooks Syntax
+        run: |
+          ansible-playbook deploy_web.yml --syntax-check
+          ansible-playbook advanced_mgmt.yml --syntax-check
+          ansible-playbook setup_lb.yml --syntax-check
+
+  # Giai đoạn 2: Continuous Deployment (Tự động kích hoạt deployment)
+  deploy:
+    name: CD - Deploy Infrastructure
+    needs: syntax_check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Notify Pipeline Success
+        run: |
+          echo "CI Syntax Check passed successfully!"
+          echo "Automated trigger ready for Control Node deployment."
