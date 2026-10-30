@@ -27,9 +27,9 @@ jobs:
 
       - name: Validate Playbooks Syntax
         run: |
-          ansible-playbook deploy_web.yml --syntax-check
-          ansible-playbook advanced_mgmt.yml --syntax-check
-          ansible-playbook setup_lb.yml --syntax-check
+          ansible-playbook deploy_web.yml -i hosts --syntax-check
+          ansible-playbook advanced_mgmt.yml -i hosts --syntax-check
+          ansible-playbook setup_lb.yml -i hosts --syntax-check
 
   # Giai đoạn 2: Continuous Deployment (Tự động kích hoạt deployment)
   deploy:
